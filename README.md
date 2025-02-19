@@ -1,1 +1,1 @@
-# print
+# Simply named print. PY & SH Scripts, some custom native libraries if needed. Use is batch processes against images. For each need encountered in prep single image for physical print in screen, dtf, dtg, sublimation, cutting, transfer templates I create a bulk processing script here.
