@@ -5,16 +5,27 @@ from PIL import Image
 # Force CPU processing
 os.environ["U2NET_ENABLE_GPU"] = "False"
 
-input_path = "greentreesinbackground_2752732759.png"  # Replace with your file path
-output_path = "output_greentreesinbackground_2752732759.png"
+input_path = "missing_FB_IMG_1737749270272.png"  # Replace with your file path
+output_path = "output_whitebg_2752732759.png"
 
 # Open the image
 image = Image.open(input_path)
-image2 = Image.
+
 # Remove the background
 output = remove(image)
 
-# Save the processed image
-output.save(output_path)
+# Convert to RGBA if not already
+if output.mode != "RGBA":
+    output = output.convert("RGBA")
 
-print(f"Background removed and saved as: {output_path}")
+# Create a white background
+white_bg = Image.new("RGBA", output.size, (255, 255, 255, 255))
+white_bg.paste(output, (0, 0), output)
+
+# Convert back to RGB (removing alpha channel)
+final_image = white_bg.convert("RGB")
+
+# Save the processed image
+final_image.save(output_path)
+
+print(f"Background changed to white and saved as: {output_path}")
