@@ -4,6 +4,9 @@ simple_esgran_upscale_cpu.py
 Minimal Real-ESRGAN script that runs exclusively on CPU.
 Optimizes for available CPU instructions (MKL, AVX, OpenMP).
 Does nothing beyond upscaling an image on CPU.
+CPU only and optimized due to both GPU normally in use.
+Will make a separate one that checks if CUDA devices available and use GPU
+Later combining work on both GPU1 GPU2 and CPU will make fast as possible.
 
 Author: Shawn
 """
