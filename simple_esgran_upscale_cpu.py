@@ -21,9 +21,9 @@ def check_cpu_optimizations():
         "MKL": torch._C.has_mkl,
         "MKL-DNN": torch.backends.mkldnn.enabled,
         "OpenMP": torch.backends.openmp.is_available(),
-        "AVX": torch.has_avx,
-        "AVX2": torch.has_avx2,
-        "FMA": torch.has_fma,
+        #"AVX": torch.has_avx,
+        #"AVX2": torch.has_avx2,
+        #"FMA": torch.has_fma,
     }
     
     print("\n🔍 CPU Optimizations Available:")
@@ -65,7 +65,7 @@ def load_model(model_path, scale):
 
 def upscale_image(input_path, output_path, scale=4):
     """ Perform image upscaling on CPU """
-    model_path = "RealESRGAN_x4plus.pth"
+    model_path = "RealESRGAN_x4.pth"
     
     if not os.path.exists(model_path):
         print(f"❌ Model file '{model_path}' not found. Download it from the official repo.")
@@ -96,4 +96,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Real-ESRGAN CPU-only Image Upscaler")
     parser.add_argument("--input", required=True, help="Path to input image")
-    parser.add_argument("--output", required=True, help="Path to save upscal
+    parser.add_argument("--output", required=True, help="Path to save upscaled image")
+    parser.add_argument("--scale", type=int, default=4, help="Upscaling factor (default: 4)")
+    args = parser.parse_args()
+
+    upscale_image(args.input, args.output, scale=args.scale)
