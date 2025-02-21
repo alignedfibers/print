@@ -65,7 +65,7 @@ def load_model(model_path, scale):
 
 def upscale_image(input_path, output_path, scale=4):
     """ Perform image upscaling on CPU """
-    model_path = "RealESRGAN_x4.pth"
+    model_path = "RealESRGAN_x4plus.pth"
     
     if not os.path.exists(model_path):
         print(f"❌ Model file '{model_path}' not found. Download it from the official repo.")
