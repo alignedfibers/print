@@ -3,6 +3,7 @@ This uses an image processing kernel / matrix for a dialation effect by checking
 This has a dialation effect and it is not biased it treats pixels equally. No edge or tranistion detection.
 This started as a gray scale thicken only, but this version is updated to handle RGB thickening also. (probably works better on gray scale)
 It is cool math.
+Not yet working, needs updates yet. 02/21 3:18 pm
 """
 
 import os   
