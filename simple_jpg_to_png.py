@@ -1,3 +1,4 @@
+import uuid
 import sys
 import os
 from PIL import Image

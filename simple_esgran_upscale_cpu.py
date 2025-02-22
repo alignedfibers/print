@@ -10,13 +10,14 @@ Later combining work on both GPU1 GPU2 and CPU will make fast as possible.
 
 Author: Shawn
 """
-
+import uuid
 import torch
 import cv2
 import os
 import numpy as np
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan import RealESRGANer
+OUTPUT_LEVEL = "PROMPT"
 
 def check_cpu_optimizations():
     """ Check available CPU optimizations and enable them if supported. """
@@ -29,7 +30,7 @@ def check_cpu_optimizations():
         #"FMA": torch.has_fma,
     }
     
-    print("\n🔍 CPU Optimizations Available:")
+    do_info("\n🔍 CPU Optimizations Available:")
     for opt, available in optimizations.items():
         print(f"  {opt}: {'✅ Enabled' if available else '❌ Not Available'}")
 
@@ -68,7 +69,7 @@ def load_model(model_path, scale):
 
 def upscale_image(input_path, output_path, scale=4):
     """ Perform image upscaling on CPU """
-    model_path = "RealESRGAN_x4plus.pth"
+    model_path = "./models/RealESRGAN_x4plus.pth"
     
     if not os.path.exists(model_path):
         print(f"❌ Model file '{model_path}' not found. Download it from the official repo.")
@@ -88,11 +89,63 @@ def upscale_image(input_path, output_path, scale=4):
 
     # Enhance resolution
     output, _extra = upscaler.enhance(img, outscale=scale)
-    meta = extra[0] if extra else None
+    #meta = _extra[0] if _extra else None
     # Save output
     output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
     cv2.imwrite(output_path, output)
     print(f"✅ Upscaled image saved to: {output_path}")
+
+def upscale_image_runner(input_dir, output_dir, scaleval):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    for file in os.listdir(input_dir):
+        if file.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".webp")):
+            input_path = os.path.join(input_dir, file)
+            output_path = os.path.join(output_dir, os.path.splitext(file)[0] + ".png")
+            if os.path.exists(output_path): 
+                output_path = os.path.join(output_dir, os.path.splitext(file)[0] +str(uuid.uuid4())[-4:]+ ".png")
+
+            try:
+                upscale_image(input_path, output_path, scale=scaleval)
+                print(f"Upscaled: {input_path} -> {output_path}")
+            except Exception as e:
+                print(f"Failed to convert {output_path}: {e}")
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Real-ESRGAN CPU-only Image Upscaler")
+    # Recursion flag (like -r in cp)
+    parser.add_argument("-r", "--recursion", action="store_true", help="Process images in directories recursively. Ignored if input-path is not a directory")
+    # Input path: can be file or directory; if omitted, we use current directory (with a warning)
+    parser.add_argument("-ip", "--input-path", default=None, help="Path to input file or directory. If not specified, current directory is used.")
+    # Output path: may be a file (when input is file) or a directory
+    parser.add_argument("-op", "--output-path", default=None, help="Path to output file or directory. Optional.")
+    # Scale factor, with values 0-5 and default of 4
+    parser.add_argument("-sc", "--scale", type=int, choices=range(0,6), default=4, help="Upscaling factor (0-5, default: 4)")
+    # Silence my friend, has options for silence Errors, Errors+Warnings, Errors+Warnings+Info, Errors+Warnings+Info+Prompts
+    parser.add_argument("-si", "--silent", type=str, choices=("NONE","ERR","WARNING","INFO","PROMPT"), default="PROMPT", help="PROMPT is all output and NONE is silent - NONE,ERR,WARNING,INFO,PROMPT")
+    return parser.parse_args()     
+
+def do_warning(msg):
+    print(msg)
+def do_yes_no_prompt():
+    #Do yes/no prompt
+    response = input("Do you want to continue? (yes/no): ").strip().lower()
+    if response not in ('yes', 'y'): 
+        print("Operation cancelled by user.")
+        sys.exit(0)
+    return
+def do_error(msg):
+    print(msg)
+def do_info(msg):
+    print(msg)
+         
+def validate_args(args):
+    #inspect and decorate the arguments according to logic requiring checks
+    if args.input_path is None:
+        do_warn("All images in current directory will be scaled and saved as with new file names\n \
+        No path specified please take caution")
+        do_yes_no_prompt()
 
 if __name__ == "__main__":
     import argparse
@@ -102,5 +155,6 @@ if __name__ == "__main__":
     parser.add_argument("--output", required=True, help="Path to save upscaled image")
     parser.add_argument("--scale", type=int, default=4, help="Upscaling factor (default: 4)")
     args = parser.parse_args()
-
+    #validate_args(arguments)
     upscale_image(args.input, args.output, scale=args.scale)
+    #upscale_helper(args.input)
